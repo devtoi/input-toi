@@ -10,16 +10,15 @@ file(GLOB_RECURSE InputSources
 	"Typedefs.h"
 	"LogInput.h"
 )
-set(USE_CUSTOM_ALLOCATOR_HEADER_FOR_INPUT true)
-set(CUSTOM_ALLOCATOR_HEADER_FOR_INPUT "<memory/Alloc.h>")
 
 if(USE_CUSTOM_ALLOCATOR_HEADER_FOR_INPUT)
 else(USE_CUSTOM_ALLOCATOR_HEADER_FOR_INPUT)
 	list(APPEND InputSources "Alloc.h")
+	add_definitions(-DINPUT_ALLOCATION_HEADER=${CUSTOM_ALLOCATOR_HEADER_FOR_INPUT})
 endif(USE_CUSTOM_ALLOCATOR_HEADER_FOR_INPUT)
 
+message(${CUSTOM_ALLOCATOR_HEADER_FOR_INPUT})
 add_definitions(-DINPUT_DLL_EXPORT)
-add_definitions(-DINPUT_ALLOCATION_HEADER=${CUSTOM_ALLOCATOR_HEADER_FOR_INPUT})
 add_library(Input SHARED ${InputSources})
 target_link_libraries(Input Utility ${SDL2Library} Memory)
 
