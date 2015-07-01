@@ -17,7 +17,6 @@ else(USE_CUSTOM_ALLOCATOR_HEADER_FOR_INPUT)
 	add_definitions(-DINPUT_ALLOCATION_HEADER=${CUSTOM_ALLOCATOR_HEADER_FOR_INPUT})
 endif(USE_CUSTOM_ALLOCATOR_HEADER_FOR_INPUT)
 
-message(${CUSTOM_ALLOCATOR_HEADER_FOR_INPUT})
 add_definitions(-DINPUT_DLL_EXPORT)
 add_library(Input SHARED ${InputSources})
 target_link_libraries(Input Utility ${SDL2Library} Memory)
