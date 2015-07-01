@@ -1,8 +1,6 @@
 #pragma once
 #include <SDL2/SDL_events.h>
 #include "Input.h"
-//#include "Alloc.h"
-#include INPUT_ALLOCATION_HEADER
 
 #define g_TextInput TextInput::GetInstance()
 

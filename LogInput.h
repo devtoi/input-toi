@@ -1,7 +1,6 @@
 #pragma once
 
-//#include "Alloc.h"
-#include INPUT_ALLOCATION_HEADER
+#include "InputLibraryDefine.h"
 
 #ifdef LOG_TO_COUT
 static void LogInput( const rString& message, const char* category = "Input", int severityMask = 0)

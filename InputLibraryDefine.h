@@ -9,3 +9,9 @@
 #else
 #define INPUT_API
 #endif
+
+#ifndef INPUT_ALLOCATION_HEADER
+#include "Alloc.h"
+#else
+#include INPUT_ALLOCATION_HEADER
+#endif

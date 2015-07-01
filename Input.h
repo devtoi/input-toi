@@ -4,8 +4,6 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_events.h>
 #include "InputLibraryDefine.h"
-//#include "Alloc.h"
-#include INPUT_ALLOCATION_HEADER
 
 #define g_Input Input::GetInstance()
 

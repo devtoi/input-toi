@@ -1,11 +1,10 @@
-#include "core/CompileFlags.h"
 #include "../Alloc.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 #include <utility/Logger.h>
-#include <Input.h>
-#include <TextInput.h>
+#include <input/Input.h>
+#include <input/TextInput.h>
 
 void RegisterLogger( );
 
