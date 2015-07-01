@@ -2,7 +2,8 @@
 
 #include <map>
 #include <SDL2/SDL_scancode.h>
-#include "Alloc.h"
+//#include "Alloc.h"
+#include INPUT_ALLOCATION_HEADER
 #include "InputLibraryDefine.h"
 #include "KeyBindingCollection.h"
 
