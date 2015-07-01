@@ -14,31 +14,33 @@ public:
 	INPUT_API void					HandleEvents( const SDL_Event& event );
 
 	// Starts inputting and resets the input string.
-	INPUT_API void					StartInput	( unsigned int id );
+	INPUT_API void					StartInput	( rString* text, int cursor, unsigned int id );
 	// Stops inputting and returns the inputted string.
-	INPUT_API const rString&		StopInput	( );
+	INPUT_API const rString*		StopInput	( );
 	INPUT_API bool					IsInputting ( unsigned int id ) const;
 
-	INPUT_API void					ResetString ( unsigned int id );
+	INPUT_API void					ResetString ();
 
-	INPUT_API const	rString&		GetString( unsigned int id ) const;
-	INPUT_API void					SetString( unsigned int id, const rString& input );
+	INPUT_API rString*				GetString( ) const;
+	INPUT_API void					SetString( rString* input );
 	
-	INPUT_API const unsigned int	GetTextCursor( unsigned int id ) const;
+	INPUT_API const unsigned int	GetTextCursor( ) const;
+	INPUT_API void					SetTextCursor( int cursor );
 	
-	INPUT_API void					MoveCursor( unsigned int id, int direction );
-	
-	INPUT_API unsigned int			ReserveAndGetInputID();
+	INPUT_API void					MoveCursor( int direction );
 
 private:
-	//rString							m_InpurString = "";
+	//rString						m_InpurString = "";
 	rString							m_Composition;
 	bool							m_IsInputting = false;
 	
-	const rString					m_EmptyString = "";
-	pVector<rString>				m_InputStrings;
-	pVector<unsigned int>			m_TextCursors;
+	//const rString					m_EmptyString = "";
+	//pMap<unsigned int, rString>		m_InputStrings;
+	//pMap<unsigned int, unsigned int> m_TextCursors;
 	
-	unsigned int					m_CurrentInputString;
+	//unsigned int					m_CurrentInputString;
+	rString*						m_InputString = nullptr;
+	int								m_Cursor = -1;
+	unsigned int					m_CurrentOwner = -1;
 };
 
