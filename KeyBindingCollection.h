@@ -3,8 +3,7 @@
 #include "InputLibraryDefine.h"
 #include "Typedefs.h"
 
-class KeyBindingCollection
-{
+class KeyBindingCollection {
 public:
 	INPUT_API KeyBindingCollection();
 	INPUT_API ~KeyBindingCollection();

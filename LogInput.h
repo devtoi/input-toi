@@ -3,10 +3,8 @@
 #include "InputLibraryDefine.h"
 
 #ifdef LOG_TO_COUT
-namespace LogSeverity
-{
-	enum BitFlag
-	{
+namespace LogSeverity {
+	enum BitFlag {
 		/// <summary> Program is likely to crash or not work correctly. </summary>
 		ERROR_MSG	= 0x01,
 		/// <summary>Something that may affect the programs normal behaviour.</summary>
@@ -23,14 +21,12 @@ namespace LogSeverity
 		ALL		= 0x0F,
 	};
 }
-static void LogInput( const rString& message, const char* category = "Input", int severityMask = 0)
-{
+static void LogInput( const rString& message, const char* category = "Input", int severityMask = 0) {
 	std::cout << category << ": " << message << std::endl;
 }
 #else
 #include <utility/Logger.h>
-static void LogInput( const rString& message, const char* category = "Input", int severityMask = LogSeverity::INFO_MSG )
-{
+static void LogInput( const rString& message, const char* category = "Input", int severityMask = LogSeverity::INFO_MSG ) {
 	Logger::Log( message, category, static_cast<LogSeverity::BitFlag>( severityMask ) );
 }
 #endif

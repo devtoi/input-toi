@@ -9,8 +9,7 @@ struct ActionIdentifier_Tag {};
 
 typedef Handle<ActionIdentifier_Tag, int, -1> ActionIdentifier;
 
-enum class INPUT_API KeyBindingType
-{
+enum class INPUT_API KeyBindingType {
 	Primary,
 	Secondary,
 	Any

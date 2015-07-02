@@ -9,8 +9,7 @@
 
 #define g_Input Input::GetInstance()
 
-enum INPUT_API MOUSE_BUTTON
-{
+enum INPUT_API MOUSE_BUTTON {
 	MOUSE_BUTTON_LEFT	= SDL_BUTTON_LEFT,
 	MOUSE_BUTTON_MIDDLE	= SDL_BUTTON_MIDDLE,
 	MOUSE_BUTTON_RIGHT	= SDL_BUTTON_RIGHT,
@@ -20,8 +19,7 @@ enum INPUT_API MOUSE_BUTTON
 
 class Gamepad;
 
-class Input
-{
+class Input {
 public:
 	static INPUT_API Input*		GetInstance			( );
 
