@@ -95,7 +95,14 @@ bool KeyBindings::ActionUpDown( ActionIdentifier action, INPUT_TYPE inputType, b
 		return g_Input->KeyUpDown( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action ), ignorePause ) ||
 			   g_Input->KeyUpDown( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action ), ignorePause );
 	} else if ( inputType == INPUT_TYPE_ANY ){
-		assert( false ); // TODOJM: Implement checking keyboard and all gamepads
+		if ( ActionUpDown( action, INPUT_TYPE_KEYBOARD, ignorePause) ) {
+			return true;
+		}
+		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
+			if ( ActionUpDown( action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+				return true;
+			}
+		}
 		return false;
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
@@ -114,7 +121,14 @@ bool KeyBindings::ActionDownUp( ActionIdentifier action, INPUT_TYPE inputType, b
 		return g_Input->KeyDownUp( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action ), ignorePause ) ||
 			   g_Input->KeyDownUp( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action ), ignorePause );
 	} else if ( inputType == INPUT_TYPE_ANY ){
-		assert( false ); // TODOJM: Implement checking keyboard and all gamepads
+		if ( ActionDownUp( action, INPUT_TYPE_KEYBOARD, ignorePause) ) {
+			return true;
+		}
+		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
+			if ( ActionDownUp( action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+				return true;
+			}
+		}
 		return false;
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
@@ -133,7 +147,14 @@ bool KeyBindings::ActionUp( ActionIdentifier action, INPUT_TYPE inputType, bool 
 		return g_Input->KeyUp( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action ), ignorePause ) ||
 			   g_Input->KeyUp( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action ), ignorePause );
 	} else if ( inputType == INPUT_TYPE_ANY ){
-		assert( false ); // TODOJM: Implement checking keyboard and all gamepads
+		if ( ActionUp( action, INPUT_TYPE_KEYBOARD, ignorePause) ) {
+			return true;
+		}
+		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
+			if ( ActionUp( action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+				return true;
+			}
+		}
 		return false;
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
@@ -152,7 +173,14 @@ bool KeyBindings::ActionDown( ActionIdentifier action, INPUT_TYPE inputType, boo
 		return g_Input->KeyDown( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action ), ignorePause ) ||
 			   g_Input->KeyDown( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action ), ignorePause );
 	} else if ( inputType == INPUT_TYPE_ANY ){
-		assert( false ); // TODOJM: Implement checking keyboard and all gamepads
+		if ( ActionDown( action, INPUT_TYPE_KEYBOARD, ignorePause) ) {
+			return true;
+		}
+		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
+			if ( ActionDown( action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+				return true;
+			}
+		}
 		return false;
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );

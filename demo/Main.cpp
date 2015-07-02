@@ -54,13 +54,13 @@ int main( int argc, char* argv[] )
 			std::cout << SDL_GetScancodeName( g_Input->GetEditablePressStack( ).back( ) ) << std::endl;
 			g_Input->GetEditablePressStack( ).pop_back( );
 		}
-		if ( g_KeyBindings.ActionUpDown( testAction, INPUT_TYPE_GAMEPAD_FIRST ) )
+		if ( g_KeyBindings.ActionUpDown( testAction, INPUT_TYPE_ANY ) )
 		{
-			std::cout << "action1 up down with gamepad" << std::endl;
+			std::cout << "action1 up down with any" << std::endl;
 		}
 		if ( g_KeyBindings.ActionDownUp( testAction2, INPUT_TYPE_GAMEPAD_FIRST ) )
 		{
-			std::cout << "action2 down up with gamepad" << std::endl;
+			std::cout << "action2 down up with gamepad only" << std::endl;
 		}
 		std::this_thread::sleep_for (std::chrono::milliseconds(17));
 	}
