@@ -24,8 +24,8 @@ int main( int argc, char* argv[] )
 	g_TextInput.Initialize( );
 	g_Input->Initialize( );
 
-	ActionIdentifier testAction = g_KeyBindings.AddAction( "testaction", SDL_SCANCODE_W, "test desc" );
-	ActionIdentifier testAction2 = g_KeyBindings.AddAction( "testaction2", SDL_SCANCODE_S, "test desc" );
+	ActionIdentifier testAction = g_KeyBindings.AddAction( "testaction", SDL_SCANCODE_W, "test desc", SDL_CONTROLLER_BUTTON_B );
+	ActionIdentifier testAction2 = g_KeyBindings.AddAction( "testaction2", SDL_SCANCODE_S, "test desc", SDL_CONTROLLER_BUTTON_A  );
 
 	g_KeyBindings.ReadConfig( );
 
@@ -54,17 +54,13 @@ int main( int argc, char* argv[] )
 			std::cout << SDL_GetScancodeName( g_Input->GetEditablePressStack( ).back( ) ) << std::endl;
 			g_Input->GetEditablePressStack( ).pop_back( );
 		}
-		if ( g_KeyBindings.ActionUpDown( testAction ) )
+		if ( g_KeyBindings.ActionUpDown( testAction, INPUT_TYPE_GAMEPAD_FIRST ) )
 		{
-			std::cout << "UpDown: W" << std::endl;
+			std::cout << "action1 up down with gamepad" << std::endl;
 		}
-		if ( g_KeyBindings.ActionUpDown( testAction2 ) )
+		if ( g_KeyBindings.ActionDownUp( testAction2, INPUT_TYPE_GAMEPAD_FIRST ) )
 		{
-			std::cout << "UpDown: S" << std::endl;
-		}
-		if ( g_Input->GetGamepad( 0 )->ButtonUpDown( SDL_CONTROLLER_BUTTON_B ) )
-		{
-			std::cout << "Gamepad: B" << std::endl;
+			std::cout << "action2 down up with gamepad" << std::endl;
 		}
 		std::this_thread::sleep_for (std::chrono::milliseconds(17));
 	}
@@ -84,7 +80,8 @@ void RegisterLogger( )
 		// NAME						PARENT
 		{ "Input", 					"" },
 			{ "Gamepad", 					"Input" },
-		{ "KeyBindings",			"Input" },
+			{ "GamepadBindingCollection",	"Input" },
+			{ "KeyBindings",				"Input" },
 		{ "FileUtility",			"" },
 		{ "Config",					"" },
 		{ "CallbackConfig",			"" },

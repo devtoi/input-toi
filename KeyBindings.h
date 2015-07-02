@@ -4,17 +4,26 @@
 #include <SDL2/SDL_scancode.h>
 #include "InputLibraryDefine.h"
 #include "KeyBindingCollection.h"
+#include "GamepadBindingCollection.h"
 #include "Typedefs.h"
 
 #define g_KeyBindings KeyBindings::GetInstance()
 
-class KeyBindings
-{
+enum INPUT_TYPE {
+	INPUT_TYPE_ANY = -2,
+	INPUT_TYPE_KEYBOARD = -1,
+	INPUT_TYPE_GAMEPAD_FIRST = 0,
+	INPUT_TYPE_GAMEPAD_SECOND = 1,
+	INPUT_TYPE_GAMEPAD_THIRD = 3,
+	INPUT_TYPE_GAMEPAD_FOURTH = 4,
+};
+
+class KeyBindings {
 public:
-	struct ActionTitleMapping
-	{
+	struct ActionTitleMapping {
 		ActionIdentifier Action;
 		SDL_Scancode DefaultScancode;
+		SDL_GameControllerButton DefaultButton ;
 	};
 
 	INPUT_API static KeyBindings& GetInstance();
@@ -23,12 +32,13 @@ public:
 	INPUT_API void ReloadConfig( );
 	INPUT_API void SaveConfig( const rString& configPath = "" );
 
-	INPUT_API ActionIdentifier AddAction( const rString& name, SDL_Scancode scancode, const rString& description );
+	INPUT_API ActionIdentifier AddAction( const rString& name, SDL_Scancode scancode,
+			const rString& description, SDL_GameControllerButton = SDL_CONTROLLER_BUTTON_INVALID );
 
-	INPUT_API bool ActionUpDown	( ActionIdentifier action, bool ignorePause = false ) const;
-	INPUT_API bool ActionDownUp	( ActionIdentifier action, bool ignorePause = false ) const;
-	INPUT_API bool ActionUp		( ActionIdentifier action, bool ignorePause = false ) const;
-	INPUT_API bool ActionDown	( ActionIdentifier action, bool ignorePause = false ) const;
+	INPUT_API bool ActionUpDown	( ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionDownUp	( ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionUp		( ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionDown	( ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
 
 	INPUT_API void GetDefault( KeyBindingCollection& collection ) const;
 
@@ -58,4 +68,5 @@ private:
 	rVector<rString> m_ActionDescriptions;
 
 	KeyBindingCollection m_KeyBindingCollection;
+	GamepadBindingCollection m_GamepadBindingCollection;
 };
