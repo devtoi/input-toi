@@ -3,8 +3,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 #include <utility/Logger.h>
+#include <utility/ConfigManager.h>
 #include <input/Input.h>
 #include <input/TextInput.h>
+#include <input/KeyBindings.h>
+#include <input/Gamepad.h>
+#include <chrono>
+#include <thread>
 
 void RegisterLogger( );
 
@@ -18,6 +23,11 @@ int main( int argc, char* argv[] )
 
 	g_TextInput.Initialize( );
 	g_Input->Initialize( );
+
+	ActionIdentifier testAction = g_KeyBindings.AddAction( "testaction", SDL_SCANCODE_W, "test desc" );
+	ActionIdentifier testAction2 = g_KeyBindings.AddAction( "testaction2", SDL_SCANCODE_S, "test desc" );
+
+	g_KeyBindings.ReadConfig( );
 
 	bool quit = false;
 	while ( !quit )
@@ -44,7 +54,21 @@ int main( int argc, char* argv[] )
 			std::cout << SDL_GetScancodeName( g_Input->GetEditablePressStack( ).back( ) ) << std::endl;
 			g_Input->GetEditablePressStack( ).pop_back( );
 		}
+		if ( g_KeyBindings.ActionUpDown( testAction ) )
+		{
+			std::cout << "UpDown: W" << std::endl;
+		}
+		if ( g_KeyBindings.ActionUpDown( testAction2 ) )
+		{
+			std::cout << "UpDown: S" << std::endl;
+		}
+		if ( g_Input->GetGamepad( 0 )->ButtonUpDown( SDL_CONTROLLER_BUTTON_B ) )
+		{
+			std::cout << "Gamepad: B" << std::endl;
+		}
+		std::this_thread::sleep_for (std::chrono::milliseconds(17));
 	}
+	g_ConfigManager.SaveDirty( );
 	SDL_Quit( );
 	return 0;
 }
@@ -59,6 +83,7 @@ void RegisterLogger( )
 	{
 		// NAME						PARENT
 		{ "Input", 					"" },
+			{ "Gamepad", 					"Input" },
 		{ "KeyBindings",			"Input" },
 		{ "FileUtility",			"" },
 		{ "Config",					"" },

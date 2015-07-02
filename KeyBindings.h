@@ -4,6 +4,7 @@
 #include <SDL2/SDL_scancode.h>
 #include "InputLibraryDefine.h"
 #include "KeyBindingCollection.h"
+#include "Typedefs.h"
 
 #define g_KeyBindings KeyBindings::GetInstance()
 

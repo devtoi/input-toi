@@ -5,6 +5,8 @@
 #include <SDL2/SDL_events.h>
 #include "InputLibraryDefine.h"
 
+#define INPUT_MAX_NR_OF_GAMEPADS 16
+
 #define g_Input Input::GetInstance()
 
 enum INPUT_API MOUSE_BUTTON
@@ -15,6 +17,8 @@ enum INPUT_API MOUSE_BUTTON
 	MOUSE_BUTTON_4		= SDL_BUTTON_X1,
 	MOUSE_BUTTON_5		= SDL_BUTTON_X2,
 };
+
+class Gamepad;
 
 class Input
 {
@@ -68,6 +72,8 @@ public:
 	INPUT_API rVector<SDL_Scancode>& GetEditablePressStack();
 	INPUT_API const rVector<SDL_Scancode>& GetReleaseStack() const;
 	INPUT_API rVector<SDL_Scancode>& GetEditableReleaseStack();
+	
+	INPUT_API Gamepad*			GetGamepad( unsigned int index ) const;
 
 private:
 	const Uint8* 		m_CurrentKeys 		= nullptr;
@@ -91,4 +97,6 @@ private:
 
 	rVector<SDL_Scancode> m_PressStack;
 	rVector<SDL_Scancode> m_ReleaseStack;
+
+	rVector<Gamepad*> m_Gamepads;
 };
