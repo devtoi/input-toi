@@ -1,21 +1,11 @@
 #pragma once
 
 #include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_events.h>
 #include "InputLibraryDefine.h"
-
-#define INPUT_MAX_NR_OF_GAMEPADS 16
+#include "Types.h"
 
 #define g_Input Input::GetInstance()
-
-enum INPUT_API MOUSE_BUTTON {
-	MOUSE_BUTTON_LEFT	= SDL_BUTTON_LEFT,
-	MOUSE_BUTTON_MIDDLE	= SDL_BUTTON_MIDDLE,
-	MOUSE_BUTTON_RIGHT	= SDL_BUTTON_RIGHT,
-	MOUSE_BUTTON_4		= SDL_BUTTON_X1,
-	MOUSE_BUTTON_5		= SDL_BUTTON_X2,
-};
 
 class Gamepad;
 

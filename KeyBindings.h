@@ -5,18 +5,9 @@
 #include "InputLibraryDefine.h"
 #include "KeyBindingCollection.h"
 #include "GamepadBindingCollection.h"
-#include "Typedefs.h"
+#include "Types.h"
 
 #define g_KeyBindings KeyBindings::GetInstance()
-
-enum INPUT_TYPE {
-	INPUT_TYPE_ANY = -2,
-	INPUT_TYPE_KEYBOARD = -1,
-	INPUT_TYPE_GAMEPAD_FIRST = 0,
-	INPUT_TYPE_GAMEPAD_SECOND = 1,
-	INPUT_TYPE_GAMEPAD_THIRD = 3,
-	INPUT_TYPE_GAMEPAD_FOURTH = 4,
-};
 
 class KeyBindings {
 public:

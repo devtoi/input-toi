@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL_gamecontroller.h>
 #include "InputLibraryDefine.h"
-#include "Typedefs.h"
+#include "Types.h"
 
 class GamepadBindingCollection {
 public:
