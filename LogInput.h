@@ -16,9 +16,8 @@ namespace LogSeverity {
 		/// <summary>Use this for messages that gives debug output</summary>
 		/// <para>This may be spamming position outputs from a unit.</para>
 		DEBUG_MSG	= 0x08,
-		//TODOJM can this be set to 0xff?
 		/// <summary>Only use this as bitmask. Includes all severities.</summary>
-		ALL		= 0x0F,
+		ALL			= 0x0F,
 	};
 }
 static void LogInput( const rString& message, const char* category = "Input", int severityMask = 0) {
