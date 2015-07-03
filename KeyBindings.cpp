@@ -39,7 +39,7 @@ void KeyBindings::ReadConfig( const rString& configPath ) {
 		}
 	}
 	for ( auto& title : m_ActionTitleToAction ) {
-		rString buttonName = cfg->GetString( "gamepad." + title.first, SDL_GameControllerGetStringForButton( title.second.DefaultButton ),
+        rString buttonName = cfg->GetString( "gamepad." + title.first, title.second.DefaultButton != SDL_CONTROLLER_BUTTON_INVALID ? SDL_GameControllerGetStringForButton( title.second.DefaultButton ) : "",
 											 m_ActionDescriptions.at( static_cast<int>( title.second.Action ) ) );
 		if ( buttonName != "" ) {
 			SDL_GameControllerButton button = SDL_GameControllerGetButtonFromString( buttonName.c_str() );
