@@ -16,7 +16,7 @@ void TextInput::HandleEvents( const SDL_Event& event ) {
 		return;
 
 	if( m_Cursor > m_InputString->size() )
-		m_Cursor = m_InputString->size();
+		m_Cursor = static_cast<int>( m_InputString->size() );
 
 	switch ( event.type ) {
 		case SDL_KEYDOWN:
