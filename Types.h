@@ -35,3 +35,7 @@ enum INPUT_TYPE {
 	INPUT_TYPE_GAMEPAD_THIRD	= 2,
 	INPUT_TYPE_GAMEPAD_FOURTH	= 3,
 };
+
+static bool InputTypeIsGamepad( INPUT_TYPE inputType ) {
+	return static_cast<int>( inputType ) >= 0;
+}
