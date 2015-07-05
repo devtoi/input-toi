@@ -22,12 +22,12 @@ public:
 	INPUT_API bool ButtonDownUp	( SDL_GameControllerButton button ) const;
 	INPUT_API bool ButtonUp		( SDL_GameControllerButton button ) const;
 
-	INPUT_API float RightStickX	( ) const;
-	INPUT_API float RightStickY	( ) const;
-	INPUT_API float LeftStickX	( ) const;
-	INPUT_API float LeftStickY	( ) const;
-	INPUT_API float LeftTrigger	( ) const;
-	INPUT_API float RightTrigger( ) const;
+	INPUT_API float GetRightStickX	( ) const;
+	INPUT_API float GetRightStickY	( ) const;
+	INPUT_API float GetLeftStickX	( ) const;
+	INPUT_API float GetLeftStickY	( ) const;
+	INPUT_API float GetLeftTrigger	( ) const;
+	INPUT_API float GetRightTrigger	( ) const;
 
 private:
 	SDL_GameController* m_Controller;

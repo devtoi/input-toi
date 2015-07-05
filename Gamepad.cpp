@@ -73,26 +73,26 @@ bool Gamepad::ButtonUp(SDL_GameControllerButton button) const {
 	return 	!(m_ButtonsMask 	& (1 << button));
 }
 
-float Gamepad::RightStickX () const {
+float Gamepad::GetRightStickX () const {
 	return m_RightStickX;
 }
 
-float Gamepad::RightStickY () const {
+float Gamepad::GetRightStickY () const {
 	return m_RightStickY;
 }
 
-float Gamepad::LeftStickX () const {
+float Gamepad::GetLeftStickX () const {
 	return m_LeftStickX;
 }
 
-float Gamepad::LeftStickY () const {
+float Gamepad::GetLeftStickY () const {
 	return m_LeftStickY;
 }
 
-float Gamepad::LeftTrigger() const {
+float Gamepad::GetLeftTrigger() const {
 	return m_LeftTrigger;
 }
 
-float Gamepad::RightTrigger() const {
+float Gamepad::GetRightTrigger() const {
 	return m_RightTrigger;
 }
