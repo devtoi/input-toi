@@ -2,31 +2,32 @@
 
 #include <SDL2/SDL_gamecontroller.h>
 #include <string>
+#include "InputLibraryDefine.h"
 
 using std::string;
 
 class Gamepad {
 public:
-						Gamepad(SDL_GameController* controller);
-						~Gamepad();
+	Gamepad(SDL_GameController* controller);
+	~Gamepad();
 
 	void Update();
 	// Saves current state. Used for tracking state changes.
 	void SaveState();
 
-	string GetName		( ) const;
+	INPUT_API string GetName() const;
 
-	bool ButtonDown		( SDL_GameControllerButton button ) const;
-	bool ButtonUpDown	( SDL_GameControllerButton button ) const;
-	bool ButtonDownUp	( SDL_GameControllerButton button ) const;
-	bool ButtonUp		( SDL_GameControllerButton button ) const;
+	INPUT_API bool ButtonDown	( SDL_GameControllerButton button ) const;
+	INPUT_API bool ButtonUpDown	( SDL_GameControllerButton button ) const;
+	INPUT_API bool ButtonDownUp	( SDL_GameControllerButton button ) const;
+	INPUT_API bool ButtonUp		( SDL_GameControllerButton button ) const;
 
-	float RightStickX	( ) const;
-	float RightStickY	( ) const;
-	float LeftStickX	( ) const;
-	float LeftStickY	( ) const;
-	float LeftTrigger	( ) const;
-	float RightTrigger	( ) const;
+	INPUT_API float RightStickX	( ) const;
+	INPUT_API float RightStickY	( ) const;
+	INPUT_API float LeftStickX	( ) const;
+	INPUT_API float LeftStickY	( ) const;
+	INPUT_API float LeftTrigger	( ) const;
+	INPUT_API float RightTrigger( ) const;
 
 private:
 	SDL_GameController* m_Controller;
