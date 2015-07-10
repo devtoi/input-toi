@@ -68,7 +68,7 @@ void Input::Update() {
 	}
 }
 
-void Input::HandleEvent( SDL_Event& event ) {
+void Input::HandleEvent( const SDL_Event& event ) {
 	switch( event.type ) {
 		case SDL_MOUSEWHEEL: {
 			m_ScrollX += event.wheel.x;

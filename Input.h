@@ -18,7 +18,7 @@ public:
 	INPUT_API void 				Initialize			( );
 	INPUT_API void 				Update				( );
 
-	INPUT_API void 				HandleEvent			( SDL_Event& event );
+	INPUT_API void 				HandleEvent			( const SDL_Event& event );
 
 								// Returns true if keyboard key was released previous frame and pressed this frame.
 	INPUT_API bool 				KeyUpDown			( SDL_Scancode key, bool ignorePause = false ) const;
