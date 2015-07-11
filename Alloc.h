@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <sstream>
 
@@ -49,6 +50,10 @@ template<typename T, typename U> using rMap = std::map < T, U, std::less<T>, std
 template<typename T, typename U> using pMap = std::map < T, U, std::less<T>, std::allocator< std::pair< const T, U > > >;
 template<typename T, typename U> using tMap = std::map < T, U, std::less<T>, std::allocator< std::pair< const T, U > > >;
 template<typename T, typename U> using fMap = std::map < T, U, std::less<T>, std::allocator< std::pair< const T, U > > >;
+
+template<typename Key, typename Value, typename H = std::hash<Key>> using pUnorderedMap = std::unordered_map < Key, Value, H, std::equal_to<Key>, std::allocator< std::pair< const Key, Value > > >;
+template<typename Key, typename Value, typename H = std::hash<Key>> using tUnorderedMap = std::unordered_map < Key, Value, H, std::equal_to<Key>, std::allocator< std::pair< const Key, Value > > >;
+template<typename Key, typename Value, typename H = std::hash<Key>> using fUnorderedMap = std::unordered_map < Key, Value, H, std::equal_to<Key>, std::allocator< std::pair< const Key, Value > > >;
 
 #define rAlloc( Type, count )		(Type*) malloc( sizeof(Type) * (count) )
 #define rNew( Type, ... )			new Type(__VA_ARGS__)

@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL_events.h>
-#include "Input.h"
+#include "InputLibraryDefine.h"
 
 #define g_TextInput TextInput::GetInstance()
 
@@ -22,7 +22,7 @@ public:
 	INPUT_API rString*				GetString( ) const;
 	INPUT_API void					SetString( rString* input );
 	
-	INPUT_API const unsigned int	GetTextCursor( ) const;
+	INPUT_API unsigned int			GetTextCursor( ) const;
 	INPUT_API void					SetTextCursor( int cursor );
 	
 	INPUT_API void					MoveCursor( int direction );
