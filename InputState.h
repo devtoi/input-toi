@@ -54,7 +54,7 @@ private:
 	InputState& operator = ( const InputState& rhs );
 
 	struct CallbackEntry {
-		int Priority = 0;
+		int Priority;
 		InputEventCallbackHandle Handle;
 		InputEventCallbackFunction Function;
 	};
