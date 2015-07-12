@@ -1,5 +1,6 @@
 #include "InputContext.h"
 #include "InputState.h"
+#include <iostream>
 
 InputContext& InputContext::GetInstance() {
 	static InputContext inputContext;
@@ -45,6 +46,38 @@ bool InputContext::KeyUpDown( SDL_Scancode scanCode ) const {
 	return false;
 }
 
+bool InputContext::KeyUpDownConsume( SDL_Scancode scanCode, INPUT_STATE state ) {
+	for ( pVector<SDL_Scancode>::iterator it = m_KeyboardPressStack.begin(); it != m_KeyboardPressStack.end(); ) {
+		if ( *it == scanCode ) {
+			it = m_KeyboardPressStack.erase( it );
+			if ( state != INPUT_STATE_IGNORE ) {
+				g_InputState.SetKeyState( scanCode, state );
+			}
+			return true;
+		} else {
+			++it;
+		}
+	}
+	return false;
+}
+
+int InputContext::KeyUpDownConsumeAll( SDL_Scancode scanCode, INPUT_STATE state ) {
+	int nrOfKeysConsumed = 0;
+
+	for ( pVector<SDL_Scancode>::iterator it = m_KeyboardPressStack.begin(); it != m_KeyboardPressStack.end(); ) {
+		if ( *it == scanCode ) {
+			it = m_KeyboardPressStack.erase( it );
+			++nrOfKeysConsumed;
+		} else {
+			++it;
+		}
+	}
+	if ( ( nrOfKeysConsumed > 0 ) && ( state != INPUT_STATE_IGNORE ) ) {
+		g_InputState.SetKeyState( scanCode, state );
+	}
+	return nrOfKeysConsumed;
+}
+
 bool InputContext::KeyDownUp( SDL_Scancode scanCode ) const {
 	for ( auto& released : m_KeyboardReleaseStack ) {
 		if ( released == scanCode ) {
@@ -52,6 +85,38 @@ bool InputContext::KeyDownUp( SDL_Scancode scanCode ) const {
 		}
 	}
 	return false;
+}
+
+bool InputContext::KeyDownUpConsume( SDL_Scancode scanCode, INPUT_STATE state ) {
+	for ( pVector<SDL_Scancode>::iterator it = m_KeyboardReleaseStack.begin(); it != m_KeyboardReleaseStack.end(); ) {
+		if ( *it == scanCode ) {
+			it = m_KeyboardReleaseStack.erase( it );
+			if ( state != INPUT_STATE_IGNORE ) {
+				g_InputState.SetKeyState( scanCode, state );
+			}
+			return true;
+		} else {
+			++it;
+		}
+	}
+	return false;
+}
+
+int InputContext::KeyDownUpConsumeAll( SDL_Scancode scanCode, INPUT_STATE state ) {
+	int nrOfKeysConsumed = 0;
+
+	for ( pVector<SDL_Scancode>::iterator it = m_KeyboardReleaseStack.begin(); it != m_KeyboardReleaseStack.end(); ) {
+		if ( *it == scanCode ) {
+			it = m_KeyboardReleaseStack.erase( it );
+			++nrOfKeysConsumed;
+		} else {
+			++it;
+		}
+	}
+	if ( ( nrOfKeysConsumed > 0 ) && ( state != INPUT_STATE_IGNORE ) ) {
+		g_InputState.SetKeyState( scanCode, state );
+	}
+	return nrOfKeysConsumed;
 }
 
 bool InputContext::KeyDown( SDL_Scancode scanCode ) const {
@@ -87,13 +152,29 @@ bool InputContext::MouseButtonUpDown( MOUSE_BUTTON button ) const {
 	return false;
 }
 
+bool InputContext::MouseButtonUpDownConsume( MOUSE_BUTTON button, INPUT_STATE state ) {
+	return ConsumeMouseButton( m_MouseSingleClickPressStack, button, state );
+}
+
+int InputContext::MouseButtonUpDownConsumeAll( MOUSE_BUTTON button, INPUT_STATE state ) {
+	return ConsumeMouseButtonAll( m_MouseSingleClickPressStack, button, state );
+}
+
 bool InputContext::MouseButtonDownUp( MOUSE_BUTTON button ) const {
-	for ( auto& pressed : m_MouseDoubleClickReleaseStack ) {
+	for ( auto& pressed : m_MouseSingleClickReleaseStack ) {
 		if ( pressed == button ) {
 			return true;
 		}
 	}
 	return false;
+}
+
+bool InputContext::MouseButtonDownUpConsume( MOUSE_BUTTON button, INPUT_STATE state ) {
+	return ConsumeMouseButton( m_MouseSingleClickReleaseStack, button, state );
+}
+
+int InputContext::MouseButtonDownUpConsumeAll( MOUSE_BUTTON button, INPUT_STATE state ) {
+	return ConsumeMouseButtonAll( m_MouseSingleClickReleaseStack, button, state );
 }
 
 bool InputContext::MouseButtonDoubleUpDown( MOUSE_BUTTON button ) const {
@@ -105,6 +186,14 @@ bool InputContext::MouseButtonDoubleUpDown( MOUSE_BUTTON button ) const {
 	return false;
 }
 
+bool InputContext::MouseButtonDoubleUpDownConsume( MOUSE_BUTTON button, INPUT_STATE state ) {
+	return ConsumeMouseButton( m_MouseDoubleClickPressStack, button, state );
+}
+
+int InputContext::MouseButtonDoubleUpDownConsumeAll( MOUSE_BUTTON button, INPUT_STATE state ) {
+	return ConsumeMouseButtonAll( m_MouseDoubleClickPressStack, button, state );
+}
+
 bool InputContext::MouseButtonDoubleDownUp( MOUSE_BUTTON button ) const {
 	for ( auto& pressed : m_MouseDoubleClickReleaseStack ) {
 		if ( pressed == button ) {
@@ -112,6 +201,14 @@ bool InputContext::MouseButtonDoubleDownUp( MOUSE_BUTTON button ) const {
 		}
 	}
 	return false;
+}
+
+bool InputContext::MouseButtonDoubleDownUpConsume( MOUSE_BUTTON button, INPUT_STATE stateToSet ) {
+	return ConsumeMouseButton( m_MouseDoubleClickReleaseStack, button, stateToSet );
+}
+
+int InputContext::MouseButtonDoubleDownUpConsumeAll( MOUSE_BUTTON button, INPUT_STATE stateToSet ) {
+	return ConsumeMouseButtonAll( m_MouseDoubleClickReleaseStack, button, stateToSet );
 }
 
 int InputContext::GetMousePosX() const {
@@ -122,11 +219,11 @@ int InputContext::GetMousePosY() const {
 	return g_InputState.GetMouseState().PositionY;
 }
 
-int InputContext::GetMousePosDeltaX( ) const {
+int InputContext::GetMousePosDeltaX() const {
 	return m_MousePosDeltaX;
 }
 
-int InputContext::GetMousePosDeltaY( ) const {
+int InputContext::GetMousePosDeltaY() const {
 	return m_MousePosDeltaY;
 }
 
@@ -198,5 +295,37 @@ bool InputContext::HandleEvent( const SDL_Event& event ) {
 	}
 
 	return false;
+}
+
+bool InputContext::ConsumeMouseButton( pVector<MOUSE_BUTTON>& stack, MOUSE_BUTTON button, INPUT_STATE stateToSet ) {
+	for ( pVector<MOUSE_BUTTON>::iterator it = stack.begin(); it != stack.end(); ) {
+		if ( *it == button ) {
+			it = stack.erase( it );
+			if ( stateToSet != INPUT_STATE_IGNORE ) {
+				g_InputState.SetMouseButtonState( button, stateToSet );
+			}
+			return true;
+		} else {
+			++it;
+		}
+	}
+	return false;
+}
+
+int InputContext::ConsumeMouseButtonAll( pVector<MOUSE_BUTTON>& stack, MOUSE_BUTTON button, INPUT_STATE stateToSet ) {
+	int nrOfConsumedButtons = 0;
+
+	for ( pVector<MOUSE_BUTTON>::iterator it = stack.begin(); it != stack.end(); ) {
+		if ( *it == button ) {
+			it = stack.erase( it );
+			++nrOfConsumedButtons;
+		} else {
+			++it;
+		}
+	}
+	if ( stateToSet != INPUT_STATE_IGNORE ) {
+		g_InputState.SetMouseButtonState( button, stateToSet );
+	}
+	return nrOfConsumedButtons;
 }
 

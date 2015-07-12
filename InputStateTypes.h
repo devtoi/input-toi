@@ -16,6 +16,12 @@ struct MouseState {
 	int	   PositionY   = 0;
 };
 
+enum INPUT_STATE {
+	INPUT_STATE_IGNORE = -1,
+	INPUT_STATE_UP = 0,
+	INPUT_STATE_DOWN = 1,
+};
+
 typedef const Uint8* KeyboardState;
 
 typedef Uint32 GamepadButtonState;

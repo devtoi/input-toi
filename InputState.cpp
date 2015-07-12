@@ -1,6 +1,7 @@
 #include "InputState.h"
 #include <iostream>
 #include <cassert>
+#include <cstring>
 #include <SDL2/SDL.h>
 #include "GamepadState.h"
 #include "LogInput.h"
@@ -30,13 +31,22 @@ void InputState::Deinitialize() {
 		}
 		LogInput( "Input state was destructed while still having callbacks registered to it. Callback values: " + ss.str(), "InputState", LogSeverity::WARNING_MSG );
 	}
+	if ( m_KeyboardState ) {
+		pDelete( m_KeyboardState );
+		m_KeyboardState = nullptr;
+	}
 }
 
 void InputState::Update() {
 	SDL_PumpEvents();
 
 	if ( m_KeyboardStateTracking ) {
-		m_KeyboardState = SDL_GetKeyboardState( nullptr );
+		int size;
+		const Uint8* keyboardState = SDL_GetKeyboardState( &size );
+		if ( m_KeyboardState == nullptr ) {
+			m_KeyboardState = pNewArray( Uint8, size );
+		}
+		memcpy( m_KeyboardState, keyboardState, size );
 	}
 
 	m_MouseState.ButtonState = SDL_GetMouseState( &m_MouseState.PositionX, &m_MouseState.PositionY );
@@ -170,6 +180,11 @@ bool InputState::IsMouseButtonUp( MOUSE_BUTTON mouseButton ) const {
 	return !( m_MouseState.ButtonState & SDL_BUTTON( mouseButton ) );
 }
 
+void InputState::SetMouseButtonState( MOUSE_BUTTON mouseButton, INPUT_STATE state ) {
+	// Set the corresponding bit
+	m_MouseState.ButtonState ^= (-state ^ m_MouseState.ButtonState) & (1 << mouseButton);
+}
+
 bool InputState::IsKeyDown( SDL_Scancode scanCode ) const {
 	return m_KeyboardState[scanCode] && m_KeyboardStateTracking;
 }
@@ -188,6 +203,12 @@ void InputState::DeactivateKeyboardStateTracking() {
 
 bool InputState::IsKeyboardStateTrackingActivated() const {
 	return m_KeyboardStateTracking;
+}
+
+void InputState::SetKeyState( SDL_Scancode scanCode, INPUT_STATE state ) {
+	if ( state != INPUT_STATE_IGNORE ) {
+		m_KeyboardState[ scanCode ] = static_cast<int>( state );
+	}
 }
 
 const GamepadState* InputState::GetGamepadState( unsigned int gamepadIndex ) const {

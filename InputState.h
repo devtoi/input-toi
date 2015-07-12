@@ -33,12 +33,14 @@ public:
 	INPUT_API int				GetMouseScrollAccumulationY () const;
 	INPUT_API bool				IsMouseButtonDown ( MOUSE_BUTTON mouseButton ) const;
 	INPUT_API bool				IsMouseButtonUp ( MOUSE_BUTTON mouseButton ) const;
+	INPUT_API void 				SetMouseButtonState( MOUSE_BUTTON mouseButton, INPUT_STATE state );
 
 	INPUT_API bool IsKeyDown ( SDL_Scancode scanCode ) const;
 	INPUT_API bool IsKeyUp ( SDL_Scancode scanCode ) const;
 	INPUT_API void ActivateKeyboardStateTracking ();
 	INPUT_API void DeactivateKeyboardStateTracking ();
 	INPUT_API bool IsKeyboardStateTrackingActivated () const;
+	INPUT_API void SetKeyState ( SDL_Scancode scanCode, INPUT_STATE state );
 
 	INPUT_API const GamepadState* GetGamepadState ( unsigned int gamepadIndex ) const;
 	INPUT_API size_t			  GetNrOfGamepads () const;
@@ -54,8 +56,8 @@ private:
 	pUnorderedMap<InputEventCallbackHandle, InputEventCallbackFunction, InputEventCallbackHandleHasher> m_Callbacks;// TODOJM: Make priority queue when consume is needed
 	int m_NextHandle = 0;
 
-	KeyboardState m_KeyboardState		  = nullptr;
-	bool		  m_KeyboardStateTracking = true;
+	Uint8* m_KeyboardState		   = nullptr;
+	bool   m_KeyboardStateTracking = true;
 
 	MouseState m_MouseState;
 	bool	   m_MouseInsideWindow		  = true;
