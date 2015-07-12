@@ -10,7 +10,7 @@
 
 class InputContext {
 public:
-	static InputContext& GetInstance ();
+	INPUT_API static InputContext& GetInstance ();
 
 	INPUT_API void Initialize ();
 	INPUT_API void Deinitialize ();
