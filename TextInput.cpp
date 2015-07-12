@@ -11,11 +11,16 @@ TextInput& TextInput::GetInstance() {
 void TextInput::Initialize() {
 	// Default to not start entering text
 	SDL_StopTextInput();
+	m_TextInputEventCallbackHandle = g_InputState.RegisterEventInterest( std::bind( &TextInput::HandleEvents, this, std::placeholders::_1 ) );
 }
 
-void TextInput::HandleEvents( const SDL_Event& event ) {
+void TextInput::Deinitialize() {
+	g_InputState.UnregisterEventInterest( m_TextInputEventCallbackHandle );
+}
+
+bool TextInput::HandleEvents( const SDL_Event& event ) {
 	if ( !m_InputString ) {
-		return;
+		return false;
 	}
 
 	if ( m_Cursor > m_InputString->size() ) {
@@ -56,7 +61,7 @@ void TextInput::HandleEvents( const SDL_Event& event ) {
 				m_InputString->assign( "" );
 				m_Cursor = 0;
 			}
-
+			return IsInputtableKey( event.key );
 			break;
 		case SDL_TEXTINPUT:
 			if ( m_Cursor != -1 ) {
@@ -68,19 +73,20 @@ void TextInput::HandleEvents( const SDL_Event& event ) {
 
 			break;
 	}
+	return false;
 }
 
 void TextInput::StartInput( rString* text, int cursor, unsigned int id ) {
 	m_InputString  = text;
 	m_Cursor	   = cursor;
 	m_CurrentOwner = id;
-	g_InputState.DeactivateKeyboardStateTracking( );
+	g_InputState.DeactivateKeyboardStateTracking();
 	SDL_StartTextInput();
 	m_IsInputting = true;
 }
 
 const rString* TextInput::StopInput() {
-	g_InputState.ActivateKeyboardStateTracking( );
+	g_InputState.ActivateKeyboardStateTracking();
 
 	SDL_StopTextInput();
 	m_IsInputting  = false;
@@ -126,5 +132,9 @@ void TextInput::MoveCursor( int direction ) {
 			m_Cursor += direction;
 		}
 	}
+}
+
+bool TextInput::IsInputtableKey( const SDL_KeyboardEvent& keyboardEvent ) const {
+	return keyboardEvent.keysym.sym >= 32 && keyboardEvent.keysym.sym < 132; // TODOIA Add more key exceptions
 }
 

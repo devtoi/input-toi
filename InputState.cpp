@@ -108,7 +108,9 @@ void InputState::HandleEvent( const SDL_Event &event ) {
 		case SDL_CONTROLLERDEVICEREMAPPED:
 		case SDL_FINGERDOWN:
 		case SDL_FINGERUP:
-		case SDL_FINGERMOTION: {// If you know what i mean ;)
+		case SDL_FINGERMOTION: // If you know what i mean ;)
+		case SDL_TEXTEDITING:
+		case SDL_TEXTINPUT: {
 			for ( auto& callback : m_Callbacks ) {
 				// Will return true if it wants to consume the event
 				if ( callback.second( event ) ) {

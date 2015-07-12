@@ -1,15 +1,19 @@
 #pragma once
 #include <SDL2/SDL_events.h>
 #include "InputLibraryDefine.h"
+#include "InputStateTypes.h"
 
 #define g_TextInput TextInput::GetInstance()
+
+class SDL_KeyboardEvent;
 
 class TextInput {
 public:
 	INPUT_API static TextInput& GetInstance( );
 
 	INPUT_API void					Initialize	( );
-	INPUT_API void					HandleEvents( const SDL_Event& event );
+	INPUT_API void					Deinitialize( );
+	INPUT_API bool					HandleEvents( const SDL_Event& event );
 
 	// Starts inputting and resets the input string.
 	INPUT_API void					StartInput	( rString* text, int cursor, unsigned int id );
@@ -28,6 +32,10 @@ public:
 	INPUT_API void					MoveCursor( int direction );
 
 private:
+	bool 							IsInputtableKey( const SDL_KeyboardEvent& keyboardEvent ) const;
+
+	InputEventCallbackHandle m_TextInputEventCallbackHandle;
+
 	//rString						m_InpurString = "";
 	rString							m_Composition;
 	bool							m_IsInputting = false;
