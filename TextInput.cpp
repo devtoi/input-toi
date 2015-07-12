@@ -11,7 +11,7 @@ TextInput& TextInput::GetInstance() {
 void TextInput::Initialize() {
 	// Default to not start entering text
 	SDL_StopTextInput();
-	m_TextInputEventCallbackHandle = g_InputState.RegisterEventInterest( std::bind( &TextInput::HandleEvents, this, std::placeholders::_1 ) );
+	m_TextInputEventCallbackHandle = g_InputState.RegisterEventInterest( std::bind( &TextInput::HandleEvents, this, std::placeholders::_1 ), -10 );
 }
 
 void TextInput::Deinitialize() {
@@ -135,6 +135,6 @@ void TextInput::MoveCursor( int direction ) {
 }
 
 bool TextInput::IsInputtableKey( const SDL_KeyboardEvent& keyboardEvent ) const {
-	return keyboardEvent.keysym.sym >= 32 && keyboardEvent.keysym.sym < 132; // TODOIA Add more key exceptions
+	return keyboardEvent.keysym.sym >= 32 && keyboardEvent.keysym.sym < 132;// TODOIA Add more key exceptions
 }
 

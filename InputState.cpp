@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <cstring>
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include "GamepadState.h"
 #include "LogInput.h"
@@ -27,7 +28,7 @@ void InputState::Deinitialize() {
 	if ( m_Callbacks.size() > 0 ) {
 		rStringStream ss;
 		for ( auto& callback : m_Callbacks ) {
-			ss << static_cast<int>( callback.first ) << ", ";
+			ss << static_cast<int>( callback.Handle ) << ", ";
 		}
 		LogInput( "Input state was destructed while still having callbacks registered to it. Callback values: " + ss.str(), "InputState", LogSeverity::WARNING_MSG );
 	}
@@ -41,7 +42,7 @@ void InputState::Update() {
 	SDL_PumpEvents();
 
 	if ( m_KeyboardStateTracking ) {
-		int size;
+		int			 size;
 		const Uint8* keyboardState = SDL_GetKeyboardState( &size );
 		if ( m_KeyboardState == nullptr ) {
 			m_KeyboardState = pNewArray( Uint8, size );
@@ -108,12 +109,12 @@ void InputState::HandleEvent( const SDL_Event &event ) {
 		case SDL_CONTROLLERDEVICEREMAPPED:
 		case SDL_FINGERDOWN:
 		case SDL_FINGERUP:
-		case SDL_FINGERMOTION: // If you know what i mean ;)
+		case SDL_FINGERMOTION:	// If you know what i mean ;)
 		case SDL_TEXTEDITING:
 		case SDL_TEXTINPUT: {
 			for ( auto& callback : m_Callbacks ) {
 				// Will return true if it wants to consume the event
-				if ( callback.second( event ) ) {
+				if ( callback.Function( event ) ) {
 					break;
 				}
 			}
@@ -121,16 +122,23 @@ void InputState::HandleEvent( const SDL_Event &event ) {
 	}
 }
 
-InputEventCallbackHandle InputState::RegisterEventInterest( InputEventCallbackFunction callbackFunction ) {
+InputEventCallbackHandle InputState::RegisterEventInterest( InputEventCallbackFunction callbackFunction, int priority ) {
 	InputEventCallbackHandle handle = static_cast<InputEventCallbackHandle>( m_NextHandle++ );
 
-	m_Callbacks.emplace( handle, callbackFunction );
+	m_Callbacks.push_back( CallbackEntry { priority, handle, callbackFunction } );
+	std::sort( m_Callbacks.begin(), m_Callbacks.end(), [] ( const CallbackEntry& lhs, const CallbackEntry& rhs ) {
+		return lhs.Priority < rhs.Priority;
+	} );
 	return handle;
 }
 
 void InputState::UnregisterEventInterest( InputEventCallbackHandle callbackHandle ) {
-	auto it = m_Callbacks.find( callbackHandle );
-
+	pVector<CallbackEntry>::iterator it;
+	for ( it = m_Callbacks.begin(); it != m_Callbacks.end(); ++it ) {
+		if ( it->Handle == callbackHandle ) {
+			break;
+		}
+	}
 	if ( it == m_Callbacks.end() ) {
 		LogInput( "Tried to unregister invalid input event callback handle: " + rToString( static_cast<int>( callbackHandle ) ), "InputState", LogSeverity::WARNING_MSG );
 	} else {
@@ -184,7 +192,7 @@ bool InputState::IsMouseButtonUp( MOUSE_BUTTON mouseButton ) const {
 
 void InputState::SetMouseButtonState( MOUSE_BUTTON mouseButton, INPUT_STATE state ) {
 	// Set the corresponding bit
-	m_MouseState.ButtonState ^= (-state ^ m_MouseState.ButtonState) & (1 << mouseButton);
+	m_MouseState.ButtonState ^= ( -state ^ m_MouseState.ButtonState ) & ( 1 << mouseButton );
 }
 
 bool InputState::IsKeyDown( SDL_Scancode scanCode ) const {
@@ -209,7 +217,7 @@ bool InputState::IsKeyboardStateTrackingActivated() const {
 
 void InputState::SetKeyState( SDL_Scancode scanCode, INPUT_STATE state ) {
 	if ( state != INPUT_STATE_IGNORE ) {
-		m_KeyboardState[ scanCode ] = static_cast<int>( state );
+		m_KeyboardState[scanCode] = static_cast<int>( state );
 	}
 }
 

@@ -18,7 +18,7 @@ public:
 
 	INPUT_API void					   Update ();
 	INPUT_API void					   HandleEvent ( const SDL_Event& event );
-	INPUT_API InputEventCallbackHandle RegisterEventInterest ( InputEventCallbackFunction callbackFunction );
+	INPUT_API InputEventCallbackHandle RegisterEventInterest ( InputEventCallbackFunction callbackFunction, int priority = 0 );
 	INPUT_API void					   UnregisterEventInterest ( InputEventCallbackHandle callbackHandle );
 
 
@@ -53,7 +53,13 @@ private:
 	InputState( const InputState& rhs );
 	InputState& operator = ( const InputState& rhs );
 
-	pUnorderedMap<InputEventCallbackHandle, InputEventCallbackFunction, InputEventCallbackHandleHasher> m_Callbacks;// TODOJM: Make priority queue when consume is needed
+	struct CallbackEntry {
+		int Priority = 0;
+		InputEventCallbackHandle Handle;
+		InputEventCallbackFunction Function;
+	};
+
+	pVector<CallbackEntry> m_Callbacks;
 	int m_NextHandle = 0;
 
 	Uint8* m_KeyboardState		   = nullptr;
