@@ -4,8 +4,6 @@
 #include <string>
 #include "InputLibraryDefine.h"
 
-using std::string;
-
 class GamepadState {
 public:
 	GamepadState( SDL_GameController* controller );
@@ -13,7 +11,7 @@ public:
 
 	void Update ();
 
-	INPUT_API string GetName () const;
+	INPUT_API std::string GetName () const;
 
 	INPUT_API bool ButtonDown ( SDL_GameControllerButton button ) const;
 	INPUT_API bool ButtonUp ( SDL_GameControllerButton button ) const;

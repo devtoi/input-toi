@@ -4,6 +4,7 @@
 // For making axises in the interval [-1,1]
 #define GAMEPAD_AXIS_FACTOR 1 / 32768.0f
 
+using std::string;
 GamepadState::GamepadState( SDL_GameController* controller )
 	: m_Controller( controller ) { }
 
