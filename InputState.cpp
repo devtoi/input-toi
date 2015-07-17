@@ -36,6 +36,11 @@ void InputState::Deinitialize() {
 		pDelete( m_KeyboardState );
 		m_KeyboardState = nullptr;
 	}
+	for ( auto& gamepad : m_Gamepads ) {
+		if ( gamepad ) {
+			pDelete( gamepad );
+		}
+	}
 }
 
 void InputState::Update() {
