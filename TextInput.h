@@ -5,7 +5,7 @@
 
 #define g_TextInput TextInput::GetInstance()
 
-class SDL_KeyboardEvent;
+struct SDL_KeyboardEvent;
 
 class TextInput {
 public:
@@ -49,4 +49,3 @@ private:
 	int								m_Cursor = -1;
 	unsigned int					m_CurrentOwner = -1;
 };
-
