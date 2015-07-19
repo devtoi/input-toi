@@ -1,5 +1,6 @@
 #include "TextInput.h"
 #include <SDL2/SDL_clipboard.h>
+#include <codecvt>
 #include "InputState.h"
 
 TextInput& TextInput::GetInstance() {
@@ -16,6 +17,44 @@ void TextInput::Initialize() {
 
 void TextInput::Deinitialize() {
 	g_InputState.UnregisterEventInterest( m_TextInputEventCallbackHandle );
+}
+
+bool Utf8_To_Uint( const std::string& bytes, unsigned int& target ) {
+	unsigned int size = static_cast<unsigned int>( bytes.size() );
+
+	target = 0;
+	bool result = true;
+	if ( size == 1 ) {
+		if ( ( bytes[0] >> 7 ) != 0 ) {
+			// ----- WARNING ----- //
+			std::cerr << "[utf8_to_uint] WARNING: Invalid single-byte character."
+					  << std::endl;
+			// ----- WARNING ----- */
+			result = false;
+		} else {
+			target = bytes[0];
+		}
+	} else {
+		unsigned char byte = bytes[0];
+		target = ( ( byte & ( 0xff >> ( size + 1 ) ) ) << ( 6 * ( size - 1 ) ) );
+		unsigned int i = 1;
+		while ( result && ( i < size ) ) {
+			byte = bytes[i];
+			if ( ( byte >> 6 ) != 2 ) {
+				// ----- WARNING ----- //
+				std::cerr << "[utf8_to_uint] WARNING: Invalid byte ("
+						  << static_cast<unsigned int>( byte )
+						  << ") in UTF-8 sequence at position " << i << "."
+						  << std::endl;
+				// ----- WARNING ----- */
+				result = false;
+			} else {
+				target |= ( ( byte & 0x3f ) << ( 6 * ( size - 1 - i ) ) );
+			}
+			i++;
+		}
+	}
+	return result;
 }
 
 bool TextInput::HandleEvents( const SDL_Event& event ) {
@@ -65,8 +104,48 @@ bool TextInput::HandleEvents( const SDL_Event& event ) {
 			break;
 		case SDL_TEXTINPUT:
 			if ( m_Cursor != -1 ) {
-				m_InputString->insert( m_Cursor, event.text.text );
-				++m_Cursor;
+				//Here follows a pretty haxxy semi-temp way to write some chars, will try to get UTF-8 later (TODIA)
+				unsigned int target;
+				Utf8_To_Uint( event.text.text, target );
+				rString character;
+				switch( target) {
+					case 229: //å
+						character = "å";
+						break;
+					case 228: //ä
+						character = "ä";
+						break;
+					case 246: //ö
+						character = "ö";
+						break;
+					case 197: //Å
+						character = "Å";
+						break;
+					case 196: //Ä
+						character = "Ä";
+						break;
+					case 214: //Ö
+						character = "Ö";
+						break;
+					case 167: //§
+						character = "§";
+						break;
+					case 252: //ü
+						character = "ü";
+						break;
+					case 220: //§
+						character = "Ü";
+						break;
+					default:
+						if( target >= 32 && target < 128 ) { //Only allow our defined characters and the standard ASCII ones
+							character = *(event.text.text);
+						}
+						break;
+				}
+				m_InputString->insert( m_Cursor, character );
+				if( character != "" ) {
+					++m_Cursor;
+				}
 			}
 			break;
 		case SDL_TEXTEDITING:
