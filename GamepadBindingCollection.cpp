@@ -41,6 +41,8 @@ bool GamepadBindingCollection::AddMappingWithButton( SDL_GameControllerButton bu
 		return false;
 	} else {
 		if ( BindAction( action, button, overwrite ) ) {
+			std::cout << "ddas" << static_cast<int>( action ) << std::endl;
+			std::cout << "ddasr" << static_cast<int>( m_ActionToButton.size() ) << std::endl;
 			// Bound button
 			LogInput( "Bound button \"" + rString( SDL_GameControllerGetStringForButton( button ) ) + "\" to action \"" +
 					  g_KeyBindings.GetDescription( action ) + "\"",
@@ -105,6 +107,8 @@ bool GamepadBindingCollection::BindAction( ActionIdentifier action, SDL_GameCont
 }
 
 SDL_GameControllerButton GamepadBindingCollection::GetButtonFromAction( ActionIdentifier action ) const {
-	assert( static_cast<int>( action ) < m_ActionToButton.size( ) );
+	if ( static_cast<size_t>( static_cast<int>( action ) ) >= m_ActionToButton.size( ) ) {
+		return SDL_CONTROLLER_BUTTON_INVALID;
+	}
 	return m_ActionToButton.at( static_cast<int>( action ) );
 }
