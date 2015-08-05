@@ -105,6 +105,8 @@ bool GamepadBindingCollection::BindAction( ActionIdentifier action, SDL_GameCont
 }
 
 SDL_GameControllerButton GamepadBindingCollection::GetButtonFromAction( ActionIdentifier action ) const {
-	assert( static_cast<int>( action ) < m_ActionToButton.size( ) );
+	if ( static_cast<size_t>( static_cast<int>( action ) ) >= m_ActionToButton.size( ) ) {
+		return SDL_CONTROLLER_BUTTON_INVALID;
+	}
 	return m_ActionToButton.at( static_cast<int>( action ) );
 }

@@ -108,6 +108,8 @@ bool TextInput::HandleEvents( const SDL_Event& event ) {
 				unsigned int target;
 				Utf8_To_Uint( event.text.text, target );
 				rString character;
+#pragma clang diagnostic push // Ignore invalid source encoding, TODO Fix without ignoring warning
+#pragma clang diagnostic ignored "-Winvalid-source-encoding"
 				switch( target) {
 					case 229: //å
 						character = "å";
@@ -142,6 +144,7 @@ bool TextInput::HandleEvents( const SDL_Event& event ) {
 						}
 						break;
 				}
+#pragma clang diagnostic pop
 				m_InputString->insert( m_Cursor, character );
 				if( character != "" ) {
 					++m_Cursor;
