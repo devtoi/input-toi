@@ -35,6 +35,10 @@ void InputContext::Update() {
 	m_MouseScrollDeltaY	  = g_InputState.GetMouseScrollDeltaY( m_MouseScrollLastPosY );
 	m_MouseScrollLastPosX = g_InputState.GetMouseScrollAccumulationX();
 	m_MouseScrollLastPosY = g_InputState.GetMouseScrollAccumulationY();
+
+	for ( auto& gamepad : m_GamepadContexts ) {
+		gamepad.Update();
+	}
 }
 
 bool InputContext::KeyUpDown( SDL_Scancode scanCode ) const {
