@@ -181,6 +181,10 @@ void TextInput::ResetString() {
 	}
 }
 
+bool TextInput::IsInputting( ) const {
+	return m_IsInputting;
+}
+
 bool TextInput::IsInputting( unsigned int id ) const {
 	if ( id == m_CurrentOwner ) {
 		return m_IsInputting;

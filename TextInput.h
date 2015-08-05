@@ -19,6 +19,7 @@ public:
 	INPUT_API void					StartInput	( rString* text, int cursor, unsigned int id );
 	// Stops inputting and returns the inputted string.
 	INPUT_API const rString*		StopInput	( );
+	INPUT_API bool					IsInputting() const;
 	INPUT_API bool					IsInputting ( unsigned int id ) const;
 
 	INPUT_API void					ResetString ();
