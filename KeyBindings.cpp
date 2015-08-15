@@ -5,6 +5,7 @@
 #include "LogInput.h"
 #include "InputContext.h"
 #include "GamepadContext.h"
+#include "BindContext.h"
 
 KeyBindings& KeyBindings::GetInstance() {
 	static KeyBindings keybindings;
@@ -12,60 +13,53 @@ KeyBindings& KeyBindings::GetInstance() {
 	return keybindings;
 }
 
-KeyBindings::KeyBindings() { }
+KeyBindings::KeyBindings() {
+	for ( auto& context : m_BindContexts ) {
+		if ( context ) {
+			pDelete( context );
+		}
+	}
+}
+
+BindContextHandle KeyBindings::AllocateBindContext( const pString& name ) {
+	BindContextHandle handle;
+	for ( size_t i = 0; i < m_BindContexts.size(); ++i ) { // Reuse empty slot
+		if ( m_BindContexts[i] == nullptr ) {
+			handle = static_cast<BindContextHandle>( i );
+			m_BindContexts[i] = pNew( BindContext, name );
+			return handle;
+		}
+	}
+	m_BindContexts.push_back( pNew( BindContext, name ) );
+	return static_cast<BindContextHandle>( m_BindContexts.size() - 1 );
+}
 
 void KeyBindings::ReadConfig( const rString& configPath ) {
-	rString			toRead = configPath == "" ? m_KeybindingsConfigPath : configPath;
+	pString			toRead = configPath == "" ? m_KeybindingsConfigPath : configPath;
 	CallbackConfig* cfg	   = g_ConfigManager.GetConfig( toRead );
 
-	for ( auto& title : m_ActionTitleToAction ) {
-		rString keyName = cfg->GetString( "primary." + title.first, SDL_GetScancodeName( title.second.DefaultScancode ),
-			m_ActionDescriptions.at( static_cast<int>( title.second.Action ) ) );
-		if ( keyName != "" ) {
-			SDL_Scancode scanCode = SDL_GetScancodeFromName( keyName.c_str() );
-			if ( scanCode == SDL_SCANCODE_UNKNOWN ) {
-				LogInput( "Failed to interpret " + keyName + " as a scancode", "KeyBindings", LogSeverity::WARNING_MSG );
-			} else {
-				m_KeyBindingCollection.AddMappingWithScancode( scanCode, title.second.Action );
-			}
-		}
-	}
-	for ( auto& title : m_ActionTitleToAction ) {
-		rString keyName = cfg->GetString( "secondary." + title.first, "", m_ActionDescriptions.at( static_cast<int>( title.second.Action ) ) );
-		if ( keyName != "" ) {
-			SDL_Scancode scanCode = SDL_GetScancodeFromName( keyName.c_str() );
-			if ( scanCode == SDL_SCANCODE_UNKNOWN ) {
-				LogInput( "Failed to interpret " + keyName + " as a scancode", "KeyBindings", LogSeverity::WARNING_MSG );
-			} else {
-				m_KeyBindingCollection.AddMappingWithScancode( scanCode, title.second.Action );
-			}
-		}
-	}
-	for ( auto& title : m_ActionTitleToAction ) {
-		rString buttonName =
-			cfg->GetString( "gamepad." + title.first, title.second.DefaultButton != SDL_CONTROLLER_BUTTON_INVALID ? SDL_GameControllerGetStringForButton(
-					title.second.DefaultButton ) : "",
-				m_ActionDescriptions.at( static_cast<int>( title.second.Action ) ) );
-		if ( buttonName != "" ) {
-			SDL_GameControllerButton button = SDL_GameControllerGetButtonFromString( buttonName.c_str() );
-			if ( button == SDL_CONTROLLER_BUTTON_INVALID ) {
-				LogInput( "Failed to interpret " + buttonName + " as a button", "KeyBindings", LogSeverity::WARNING_MSG );
-			} else {
-				m_GamepadBindingCollection.AddMappingWithButton( button, title.second.Action );
-			}
+	for ( auto& context : m_BindContexts ) {
+		if ( context ) {
+			context->LoadFromConfig( *cfg, m_ActionDescriptions );
 		}
 	}
 }
 
 void KeyBindings::ClearActions() {
 	m_ActionDescriptions.clear();
-	m_ActionTitleToAction.clear();
-	m_KeyBindingCollection	   = KeyBindingCollection();
-	m_GamepadBindingCollection = GamepadBindingCollection();
+	for ( auto& context : m_BindContexts ) {
+		if ( context ) {
+			context->ClearActions();
+		}
+	}
 }
 
 void KeyBindings::ReloadConfig() {
-	m_KeyBindingCollection = KeyBindingCollection();
+	for ( auto& context : m_BindContexts ) {
+		if ( context ) {
+			context->ClearBindings();
+		}
+	}
 	ReadConfig();
 }
 
@@ -73,40 +67,26 @@ void KeyBindings::SaveConfig( const rString& configPath ) {
 	rString			toSave = configPath == "" ? m_KeybindingsConfigPath : configPath;
 	CallbackConfig* cfg	   = g_ConfigManager.GetConfig( toSave );
 
-	for ( auto& keybinding : m_ActionTitleToAction ) {
-		SDL_Scancode primary = m_KeyBindingCollection.GetPrimaryScancodeFromAction( keybinding.second.Action );
-		cfg->SetString( "primary." + keybinding.first, SDL_GetScancodeName( primary ) );
-	}
-	for ( auto& keybinding : m_ActionTitleToAction ) {
-		SDL_Scancode secondary = m_KeyBindingCollection.GetSecondaryScancodeFromAction( keybinding.second.Action );
-		cfg->SetString( "secondary." + keybinding.first, SDL_GetScancodeName( secondary ) );
-	}
-	for ( auto& buttonBinding : m_ActionTitleToAction ) {
-		SDL_GameControllerButton button = m_GamepadBindingCollection.GetButtonFromAction( buttonBinding.second.Action );
-		cfg->SetString( "gamepad." + buttonBinding.first, SDL_GameControllerGetStringForButton( button ) );
+	for ( const auto& context : m_BindContexts ) {
+		if ( context ) {
+			context->SaveToConfig( *cfg );
+		}
 	}
 	cfg->SaveFile();
 }
 
-void KeyBindings::GetDefault( KeyBindingCollection& collection ) const {
-	collection = KeyBindingCollection();
-
-	for ( auto& title : m_ActionTitleToAction ) {
-		collection.AddMappingWithScancode( title.second.DefaultScancode, title.second.Action );
-	}
-}
-
-bool KeyBindings::ActionUpDown( InputContext& input, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
+bool KeyBindings::ActionUpDown( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
 	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
+	const BindContext* context = GetBindContext( bindContextHandle );
 	if ( inputType == INPUT_TYPE_KEYBOARD ) {
-		return input.KeyUpDown( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action )/*, ignorePause*/ ) ||
-			   input.KeyUpDown( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action )/*, ignorePause*/ );
+		return input.KeyUpDown( context->GetKeyBindCollection().GetPrimaryScancodeFromAction( action )/*, ignorePause*/ ) ||
+			   input.KeyUpDown( context->GetKeyBindCollection().GetSecondaryScancodeFromAction( action )/*, ignorePause*/ );
 	} else if ( inputType == INPUT_TYPE_ANY ) {
-		if ( ActionUpDown( input, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
+		if ( ActionUpDown( input, bindContextHandle, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
 			return true;
 		}
 		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
-			if ( ActionUpDown( input, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+			if ( ActionUpDown( input, bindContextHandle, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
 				return true;
 			}
 		}
@@ -114,21 +94,22 @@ bool KeyBindings::ActionUpDown( InputContext& input, ActionIdentifier action, IN
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
 		const GamepadContext& gamepad = input.GetGamepadContext( inputType );
-		return gamepad.ButtonUpDown( m_GamepadBindingCollection.GetButtonFromAction( action ) );
+		return gamepad.ButtonUpDown( context->GetGamepadBindCollection().GetButtonFromAction( action ) );
 	}
 }
 
-bool KeyBindings::ActionDownUp( InputContext& input, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
+bool KeyBindings::ActionDownUp( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
 	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
+	const BindContext* context = GetBindContext( bindContextHandle );
 	if ( inputType == INPUT_TYPE_KEYBOARD ) {
-		return input.KeyDownUp( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action )/*, ignorePause*/ ) ||
-			   input.KeyDownUp( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action )/*, ignorePause*/ );
+		return input.KeyDownUp( context->GetKeyBindCollection().GetPrimaryScancodeFromAction( action )/*, ignorePause*/ ) ||
+			   input.KeyDownUp( context->GetKeyBindCollection().GetSecondaryScancodeFromAction( action )/*, ignorePause*/ );
 	} else if ( inputType == INPUT_TYPE_ANY ) {
-		if ( ActionDownUp( input, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
+		if ( ActionDownUp( input, bindContextHandle, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
 			return true;
 		}
 		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
-			if ( ActionDownUp( input, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+			if ( ActionDownUp( input, bindContextHandle, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
 				return true;
 			}
 		}
@@ -136,21 +117,22 @@ bool KeyBindings::ActionDownUp( InputContext& input, ActionIdentifier action, IN
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
 		const GamepadContext& gamepad = input.GetGamepadContext( inputType );
-		return gamepad.ButtonDownUp( m_GamepadBindingCollection.GetButtonFromAction( action ) );
+		return gamepad.ButtonDownUp( context->GetGamepadBindCollection().GetButtonFromAction( action ) );
 	}
 }
 
-bool KeyBindings::ActionUp( InputContext& input, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
+bool KeyBindings::ActionUp( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
 	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
+	const BindContext* context = GetBindContext( bindContextHandle );
 	if ( inputType == INPUT_TYPE_KEYBOARD ) {
-		return input.KeyUp( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action ) /*, ignorePause*/ ) ||
-			   input.KeyUp( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action )	/*, ignorePause*/ );
+		return input.KeyUp( context->GetKeyBindCollection().GetPrimaryScancodeFromAction( action ) /*, ignorePause*/ ) ||
+			   input.KeyUp( context->GetKeyBindCollection().GetSecondaryScancodeFromAction( action )	/*, ignorePause*/ );
 	} else if ( inputType == INPUT_TYPE_ANY ) {
-		if ( ActionUp( input, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
+		if ( ActionUp( input, bindContextHandle, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
 			return true;
 		}
 		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
-			if ( ActionUp( input, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+			if ( ActionUp( input, bindContextHandle, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
 				return true;
 			}
 		}
@@ -158,22 +140,23 @@ bool KeyBindings::ActionUp( InputContext& input, ActionIdentifier action, INPUT_
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
 		const GamepadContext& gamepad = input.GetGamepadContext( inputType );
-		return gamepad.ButtonUp( m_GamepadBindingCollection.GetButtonFromAction( action ) );
+		return gamepad.ButtonUp( context->GetGamepadBindCollection().GetButtonFromAction( action ) );
 	}
 }
 
-bool KeyBindings::ActionDown( InputContext& input, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
+bool KeyBindings::ActionDown( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
 	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
+	const BindContext* context = GetBindContext( bindContextHandle );
 	if ( inputType == INPUT_TYPE_KEYBOARD ) {
 		// TODOJM: Implement ignore pause again if it is actually needed
-		return input.KeyDown( m_KeyBindingCollection.GetPrimaryScancodeFromAction( action )	/*, ignorePause*/ ) ||
-			   input.KeyDown( m_KeyBindingCollection.GetSecondaryScancodeFromAction( action ) /*, ignorePause*/ );
+		return input.KeyDown( context->GetKeyBindCollection().GetPrimaryScancodeFromAction( action )	/*, ignorePause*/ ) ||
+			   input.KeyDown( context->GetKeyBindCollection().GetSecondaryScancodeFromAction( action ) /*, ignorePause*/ );
 	} else if ( inputType == INPUT_TYPE_ANY ) {
-		if ( ActionDown( input, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
+		if ( ActionDown( input, bindContextHandle, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
 			return true;
 		}
 		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
-			if ( ActionDown( input, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+			if ( ActionDown( input, bindContextHandle, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
 				return true;
 			}
 		}
@@ -181,56 +164,38 @@ bool KeyBindings::ActionDown( InputContext& input, ActionIdentifier action, INPU
 	} else {
 		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
 		const GamepadContext& gamepad = input.GetGamepadContext( inputType );
-		return gamepad.ButtonDown( m_GamepadBindingCollection.GetButtonFromAction( action ) );
+		return gamepad.ButtonDown( context->GetGamepadBindCollection().GetButtonFromAction( action ) );
 	}
 }
 
-ActionIdentifier KeyBindings::AddAction( const rString& name, SDL_Scancode scancode, const rString& description, SDL_GameControllerButton defaultButton ) {
-	ActionIdentifier identifier = static_cast<ActionIdentifier>( static_cast<int>( m_ActionDescriptions.size() ) );
+ActionIdentifier KeyBindings::CreateAction( BindContextHandle bindContextHandle, const pString& name, SDL_Scancode scancode, const pString& description, SDL_GameControllerButton defaultButton ) {
+	BindContext* bindContext = GetBindContext( bindContextHandle );
+	if ( bindContext ) {
+		ActionIdentifier identifier = static_cast<ActionIdentifier>( static_cast<int>( m_ActionDescriptions.size() ) );
 
-	m_ActionDescriptions.push_back( description );
-	m_ActionTitleToAction[name] = ActionTitleMapping {
-		identifier, scancode, defaultButton
-	};
-	return identifier;
+		m_ActionDescriptions.push_back( description );
+		m_ActionNames.push_back( name );
+		AddAction( identifier, bindContextHandle, scancode, defaultButton );
+		return identifier;
+	} else {
+		LogInput( "Invalid bind context handle " + rToString( static_cast<int>( bindContextHandle ) ), "KeyBindings", LogSeverity::WARNING_MSG );
+		return ActionIdentifier::invalid();
+	}
 }
 
-const rMap<rString, KeyBindings::ActionTitleMapping>& KeyBindings::GetActionTitleToAction() const {
-	return m_ActionTitleToAction;
+void KeyBindings::AddAction( ActionIdentifier actionIdentifier, BindContextHandle bindContextHandle, SDL_Scancode scancode, SDL_GameControllerButton defaultButton ) {
+	BindContext* bindContext = GetBindContext( bindContextHandle );
+	if ( bindContext ) {
+		const pString& name = m_ActionNames.at( static_cast<int>( actionIdentifier ) );
+		bindContext->AddAction( actionIdentifier, name, scancode, defaultButton );
+	} else {
+		LogInput( "Invalid bind context handle " + rToString( static_cast<int>( bindContextHandle ) ), "KeyBindings", LogSeverity::WARNING_MSG );
+	}
 }
 
 const rVector<rString>& KeyBindings::GetActionDescriptions() const {
 	return m_ActionDescriptions;
 }
-
-const KeyBindingCollection& KeyBindings::GetKeyBindCollection() const {
-	return m_KeyBindingCollection;
-}
-
-KeyBindingCollection& KeyBindings::GetEditableKeyBindCollection() {
-	return m_KeyBindingCollection;
-}
-
-void KeyBindings::SetKeyBindingCollection( const KeyBindingCollection& collection ) {
-	m_KeyBindingCollection = collection;
-}
-
-// TODOJM: Implement again
-// bool KeyBindings::ConsumeFromPressStack( Input& input, ActionIdentifier action ) {
-//	rVector<SDL_Scancode>* pressStack = &input.GetEditablePressStack();
-//
-//	if ( pressStack->size() > 0 ) {
-//		SDL_Scancode primaryGUIAbortScanCode	= m_KeyBindingCollection.GetPrimaryScancodeFromAction( action );
-//		SDL_Scancode secondaryGUIAbortScaneCode = m_KeyBindingCollection.GetSecondaryScancodeFromAction( action );
-//		for ( rVector<SDL_Scancode>::iterator it = pressStack->begin(); it != pressStack->end(); ++it ) {
-//			if ( ( *it == primaryGUIAbortScanCode ) || ( *it == secondaryGUIAbortScaneCode ) ) {
-//				pressStack->erase( it );
-//				return true;
-//			}
-//		}
-//	}
-//	return false;
-// }
 
 const rString& KeyBindings::GetDescription( ActionIdentifier action ) const {
 	return m_ActionDescriptions.at( static_cast<int>( action ) );
@@ -240,3 +205,10 @@ const rString& KeyBindings::GetConfigPath() const {
 	return m_KeybindingsConfigPath;
 }
 
+BindContext* KeyBindings::GetBindContext( BindContextHandle bindContextHandle ) {
+	return m_BindContexts.at( static_cast<int>( bindContextHandle ) );
+}
+
+const BindContext* KeyBindings::GetBindContext( BindContextHandle bindContextHandle ) const {
+	return m_BindContexts.at( static_cast<int>( bindContextHandle ) );
+}

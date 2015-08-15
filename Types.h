@@ -7,8 +7,10 @@
 #define ACTION_IDENTIFIER_INVALID -1;
 
 struct ActionIdentifier_Tag {};
-
 typedef Handle<ActionIdentifier_Tag, int, -1> ActionIdentifier;
+
+struct BindContextHandle_tag{};
+typedef Handle<BindContextHandle_tag, int, -1> BindContextHandle;
 
 enum class INPUT_API KeyBindingType {
 	Primary,

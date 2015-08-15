@@ -15,6 +15,8 @@ file(GLOB_RECURSE InputSources
 	"KeyBindingCollection.cpp"
 	"GamepadBindingCollection.h"
 	"GamepadBindingCollection.cpp"
+	"BindContext.h"
+	"BindContext.cpp"
 	"Typedefs.h"
 	"LogInput.h"
 )
