@@ -9,7 +9,7 @@ BindContext::BindContext( const pString& name )
 
 void BindContext::LoadFromConfig( Config& cfg, const pVector<pString> descriptions ) {
 	for ( auto& title : m_ActionTitleToAction ) {
-		pString keyName = cfg.GetString( m_Name + ".primary." + title.first, SDL_GetScancodeName( title.second.DefaultScancode ),
+		pString keyName = cfg.GetString( m_Name + "primary." + title.first, SDL_GetScancodeName( title.second.DefaultScancode ),
 			descriptions.at( static_cast<int>( title.second.Action ) ) );
 		if ( keyName != "" ) {
 			SDL_Scancode scanCode = SDL_GetScancodeFromName( keyName.c_str() );
@@ -21,7 +21,7 @@ void BindContext::LoadFromConfig( Config& cfg, const pVector<pString> descriptio
 		}
 	}
 	for ( auto& title : m_ActionTitleToAction ) {
-		pString keyName = cfg.GetString( m_Name + ".secondary." + title.first, "", descriptions.at( static_cast<int>( title.second.Action ) ) );
+		pString keyName = cfg.GetString( m_Name + "secondary." + title.first, "", descriptions.at( static_cast<int>( title.second.Action ) ) );
 		if ( keyName != "" ) {
 			SDL_Scancode scanCode = SDL_GetScancodeFromName( keyName.c_str() );
 			if ( scanCode == SDL_SCANCODE_UNKNOWN ) {
@@ -33,7 +33,7 @@ void BindContext::LoadFromConfig( Config& cfg, const pVector<pString> descriptio
 	}
 	for ( auto& title : m_ActionTitleToAction ) {
 		pString buttonName =
-			cfg.GetString( m_Name + ".gamepad." + title.first, title.second.DefaultButton != SDL_CONTROLLER_BUTTON_INVALID ? SDL_GameControllerGetStringForButton(
+			cfg.GetString( m_Name + "gamepad." + title.first, title.second.DefaultButton != SDL_CONTROLLER_BUTTON_INVALID ? SDL_GameControllerGetStringForButton(
 					title.second.DefaultButton ) : "",
 				descriptions.at( static_cast<int>( title.second.Action ) ) );
 		if ( buttonName != "" ) {
@@ -50,15 +50,15 @@ void BindContext::LoadFromConfig( Config& cfg, const pVector<pString> descriptio
 void BindContext::SaveToConfig( Config& cfg ) const {
 	for ( auto& keybinding : m_ActionTitleToAction ) {
 		SDL_Scancode primary = m_KeyBindingCollection.GetPrimaryScancodeFromAction( keybinding.second.Action );
-		cfg.SetString( m_Name + ".primary." + keybinding.first, SDL_GetScancodeName( primary ) );
+		cfg.SetString( m_Name + "primary." + keybinding.first, SDL_GetScancodeName( primary ) );
 	}
 	for ( auto& keybinding : m_ActionTitleToAction ) {
 		SDL_Scancode secondary = m_KeyBindingCollection.GetSecondaryScancodeFromAction( keybinding.second.Action );
-		cfg.SetString( m_Name + ".secondary." + keybinding.first, SDL_GetScancodeName( secondary ) );
+		cfg.SetString( m_Name + "secondary." + keybinding.first, SDL_GetScancodeName( secondary ) );
 	}
 	for ( auto& buttonBinding : m_ActionTitleToAction ) {
 		SDL_GameControllerButton button = m_GamepadBindingCollection.GetButtonFromAction( buttonBinding.second.Action );
-		cfg.SetString( m_Name + ".gamepad." + buttonBinding.first, SDL_GameControllerGetStringForButton( button ) );
+		cfg.SetString( m_Name + "gamepad." + buttonBinding.first, SDL_GameControllerGetStringForButton( button ) );
 	}
 }
 
