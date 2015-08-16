@@ -43,8 +43,8 @@ public:
 
 private:
 	// No external instancing allowed
-	KeyBindings();
-	~KeyBindings() { }
+	KeyBindings(){ };
+	~KeyBindings();
 
 
 	const pString m_KeybindingsConfigPath = "keybindings.cfg";

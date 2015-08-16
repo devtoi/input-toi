@@ -13,7 +13,7 @@ KeyBindings& KeyBindings::GetInstance() {
 	return keybindings;
 }
 
-KeyBindings::KeyBindings() {
+KeyBindings::~KeyBindings() {
 	for ( auto& context : m_BindContexts ) {
 		if ( context ) {
 			pDelete( context );
