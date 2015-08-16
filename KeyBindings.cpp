@@ -25,13 +25,13 @@ BindContextHandle KeyBindings::AllocateBindContext( const pString& name ) {
 	BindContextHandle handle;
 	for ( size_t i = 0; i < m_BindContexts.size(); ++i ) { // Reuse empty slot
 		if ( m_BindContexts[i] == nullptr ) {
-			handle = static_cast<BindContextHandle>( i );
+			handle = static_cast<BindContextHandle>( static_cast<int>( i ) );
 			m_BindContexts[i] = pNew( BindContext, name );
 			return handle;
 		}
 	}
 	m_BindContexts.push_back( pNew( BindContext, name ) );
-	return static_cast<BindContextHandle>( m_BindContexts.size() - 1 );
+	return static_cast<BindContextHandle>( static_cast<int>( m_BindContexts.size() - 1 ) );
 }
 
 void KeyBindings::ReadConfig( const rString& configPath ) {
