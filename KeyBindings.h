@@ -29,10 +29,12 @@ public:
 		const pString &description, SDL_GameControllerButton = SDL_CONTROLLER_BUTTON_INVALID );
 	INPUT_API void AddAction( ActionIdentifier actionIdentifier, BindContextHandle bindContextHandle, SDL_Scancode scancode, SDL_GameControllerButton = SDL_CONTROLLER_BUTTON_INVALID );
 
-	INPUT_API bool ActionUpDown ( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
-	INPUT_API bool ActionDownUp ( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
-	INPUT_API bool ActionUp     ( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
-	INPUT_API bool ActionDown   ( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionUpDown			( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionDownUp			( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionUpDownConsume	( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionDownUpConsume	( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionUp				( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
+	INPUT_API bool ActionDown			( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType = INPUT_TYPE_KEYBOARD, bool ignorePause = false ) const;
 
 	INPUT_API const rVector<rString>& GetActionDescriptions   () const;
 

@@ -121,6 +121,52 @@ bool KeyBindings::ActionDownUp( InputContext& input, BindContextHandle bindConte
 	}
 }
 
+bool KeyBindings::ActionUpDownConsume( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
+	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
+	const BindContext* context = GetBindContext( bindContextHandle );
+	if ( inputType == INPUT_TYPE_KEYBOARD ) {
+		return input.KeyUpDownConsume( context->GetKeyBindCollection().GetPrimaryScancodeFromAction( action )/*, ignorePause*/ ) ||
+			input.KeyUpDownConsume( context->GetKeyBindCollection().GetSecondaryScancodeFromAction( action )/*, ignorePause*/ );
+	} else if ( inputType == INPUT_TYPE_ANY ) {
+		if ( ActionUpDownConsume( input, bindContextHandle, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
+			return true;
+		}
+		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
+			if ( ActionUpDownConsume( input, bindContextHandle, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+				return true;
+			}
+		}
+		return false;
+	} else {
+		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
+		const GamepadContext& gamepad = input.GetGamepadContext( inputType );
+		return gamepad.ButtonUpDown( context->GetGamepadBindCollection().GetButtonFromAction( action ) );
+	}
+}
+
+bool KeyBindings::ActionDownUpConsume( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
+	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
+	const BindContext* context = GetBindContext( bindContextHandle );
+	if ( inputType == INPUT_TYPE_KEYBOARD ) {
+		return input.KeyDownUpConsume( context->GetKeyBindCollection().GetPrimaryScancodeFromAction( action )/*, ignorePause*/ ) ||
+			input.KeyDownUpConsume( context->GetKeyBindCollection().GetSecondaryScancodeFromAction( action )/*, ignorePause*/ );
+	} else if ( inputType == INPUT_TYPE_ANY ) {
+		if ( ActionDownUpConsume( input, bindContextHandle, action, INPUT_TYPE_KEYBOARD, ignorePause ) ) {
+			return true;
+		}
+		for ( int i = 0; i < INPUT_MAX_NR_OF_GAMEPADS; ++i ) {
+			if ( ActionDownUpConsume( input, bindContextHandle, action, static_cast<INPUT_TYPE>( i ), ignorePause ) ) {
+				return true;
+			}
+		}
+		return false;
+	} else {
+		assert( inputType >= 0 && static_cast<int>( inputType ) < INPUT_MAX_NR_OF_GAMEPADS );
+		const GamepadContext& gamepad = input.GetGamepadContext( inputType );
+		return gamepad.ButtonDownUp( context->GetGamepadBindCollection().GetButtonFromAction( action ) );
+	}
+}
+
 bool KeyBindings::ActionUp( InputContext& input, BindContextHandle bindContextHandle, ActionIdentifier action, INPUT_TYPE inputType, bool ignorePause ) const {
 	assert( static_cast<int>( action ) < m_ActionDescriptions.size() );
 	const BindContext* context = GetBindContext( bindContextHandle );
