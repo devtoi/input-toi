@@ -1,6 +1,7 @@
 #include "TextInput.h"
 #include <SDL2/SDL_clipboard.h>
 #include <codecvt>
+#include <iostream>
 #include "InputState.h"
 
 TextInput& TextInput::GetInstance() {
